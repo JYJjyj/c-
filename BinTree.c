@@ -1,11 +1,13 @@
 #include "SeqQueue.c"
 #include "BinTree.h"
+
 void TreeInit(TreeNode** root)
 {
     assert(root);
     assert(*root);
     *root = NULL;
 }
+
 void PreOrder(TreeNode* root)
 {
     if(root == NULL)
@@ -14,6 +16,7 @@ void PreOrder(TreeNode* root)
     PostOrder(root->lchild);
     PostOrder(root->rchild);
 }
+
 void InOrder(TreeNode* root)
 {
     if(root == NULL)
