@@ -97,21 +97,21 @@ void DestroyNode(TreeNode *tmp)
     free(tmp);
     tmp = NULL;
 }
-void _TreeDestroy(TreeNode **root)
+void _TreeDestroy(TreeNode *root)
 {
-    if(*root == NULL)
+    if(root == NULL)
         return;
-    _TreeDestroy(&(*root)->lchild);
-    _TreeDestroy(&(*root)->rchild);
-    DestroyNode(*root);
+    _TreeDestroy(root->lchild);
+    _TreeDestroy(root->rchild);
+    DestroyNode(root);
 }
 void TreeDestroy(TreeNode** root)
 {
     assert(root);
     assert(*root);
-    _TreeDestroy(root);
-    root = NULL;
+    _TreeDestroy(*root);
     *root = NULL;
+    root = NULL;
 }
 
 TreeNode* TreeClone(TreeNode* root)
@@ -124,11 +124,20 @@ TreeNode* TreeClone(TreeNode* root)
     return newnode;
 }
 
-size_t TreeSize(TreeNode* root); 
-
-
-size_t TreeLeafSize(TreeNode* root); 
-
+size_t TreeSize(TreeNode* root)
+{
+    if(root == NULL)
+        return 0;
+    return 1 + TreeSize(root->lchild) + TreeSize(root->rchild);
+}
+size_t TreeLeafSize(TreeNode* root)
+{
+    if(root == NULL)
+        return 0;
+    if((root->lchild == NULL) && (root->rchild == NULL))
+        return 1;
+    return TreeLeafSize(root->lchild) + TreeLeafSize(root->rchild);
+}
 /** 
  * * @brief 求一棵树第 K 层节点的个数 
  * * 
@@ -136,17 +145,86 @@ size_t TreeLeafSize(TreeNode* root);
  * * 
  * * @return 
  * */ 
-size_t TreeKLevelSize(TreeNode* root, int K); 
+size_t TreeKLevelSize(TreeNode* root, int K)
+{
+    if(root == NULL)
+        return 0;
+    if(K == 1)
+        return 1;
+    return TreeKLevelSize(root->lchild,K-1) + TreeKLevelSize(root->rchild,K-1);
+}
 
-size_t TreeHeight(TreeNode* root); 
+size_t TreeHeight(TreeNode* root)
+{
+    if(root == NULL)
+        return 0;
+    size_t lheigh = TreeHeight(root->lchild);
+    size_t rheigh = TreeHeight(root->rchild);
+    return (lheigh > rheigh ? lheigh : rheigh) + 1;
+}
 
-TreeNode* TreeFind(TreeNode* root, TreeNodeType to_find); 
+TreeNode* TreeFind(TreeNode* root, TreeNodeType to_find)
+{
+    if(root == NULL)
+        return NULL;
+    if(root->data == to_find)
+        return root;
+    else
+    {
+        TreeFind(root->rchild,to_find);
+        TreeFind(root->lchild,to_find);
+    }
+    return NULL;
+}
 
-TreeNode* LChild(TreeNode* node); 
+TreeNode* LChild(TreeNode *root , TreeNode* node)
+{
+    assert(root);
+    assert(node);
+    TreeNode* tmp = TreeFind(root,node->data);
+    if(tmp != NULL)
+        return tmp->lchild;
+    else
+    {
+        return NULL;
+    }
+}
 
-TreeNode* RChild(TreeNode* node); 
-
-TreeNode* Parent(TreeNode* root, TreeNode* node); 
+TreeNode* RChild(TreeNode *root,TreeNode* node)
+{
+    assert(root);
+    assert(node);
+    TreeNode* tmp = TreeFind(root,node->data);
+    if(tmp != NULL)
+        return tmp->rchild;
+    else
+    {
+        return NULL;
+    }
+}
+TreeNode* _Parent(TreeNode *root,TreeNode *node)
+{
+    if(root == NULL)
+        return NULL;
+    if(root->lchild == node)
+        return root;
+    if(root->rchild == node)
+        return root;
+    else{
+        TreeNode* ret = _Parent(root->lchild,node);
+        ret = _Parent(root->rchild,node);
+        return ret;
+    }
+}
+TreeNode* Parent(TreeNode* root, TreeNode* node)
+{
+    assert(root);
+    assert(node);
+    TreeNode* tmp = TreeFind(root,node->data);
+    if(tmp == NULL)
+        return NULL;
+    return _Parent(root,node);
+}
 
 void PreOrderByLoop(TreeNode* root); 
 
@@ -166,7 +244,7 @@ void testCreateTree()
   TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
   printf("root->lchild :%c\n",root->rchild->data);
 }
-void testPreOrder()
+void testOrder()
 {
     TESTHEAD;
     TreeNodeType array[]="abd##eg###c#f##";
@@ -180,10 +258,66 @@ void testPreOrder()
     LevelOrder(root);
     printf("\n");
 }
+void testDestroy()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    TreeDestroy(&root);
+    printf("%p \n",root);
+}
+void testClone()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    TreeNode *newroot = TreeClone(root);
+    PostOrder(root);
+    printf("\n");
+    PostOrder(newroot);
+    printf("\n");
+}
+void testLchild()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    TreeNode* ret = LChild(root,root);
+    if(ret != NULL)
+        printf("lchild :%c\n",ret->data);
+    else{
+        printf("没有左孩子\n");
+    }
+}
+void testRchild()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    TreeNode* ret = RChild(root,root->lchild);
+    if(ret != NULL)
+        printf("rchild :%c\n",ret->data);
+    else{
+        printf("没有右孩子\n");
+    }
+}
+void testParent()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    TreeNode* ret = Parent(root,root->lchild->rchild);
+    printf("parent :%c\n",ret->data);
+}
 void test()
 {
   testCreateTree();
-  testPreOrder();
+  testOrder();
+  testDestroy();
+  testClone();
+  testLchild();
+  testRchild();
+  testParent();
 }
 
 int main()
