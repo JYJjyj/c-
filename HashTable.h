@@ -1,48 +1,48 @@
-#pragma once
-#define HashMaxSize 1000    //ºê¶¨Òå¹şÏ£±íµÄ×î´óÈİÁ¿
-#define LoadFactor 0.8       //ºê¶¨Òå¸ºÔØÒò×Ó£¬ÓÃÓÚ±íÊ¾¹şÏ£±íµÄ¸ºÔØÄÜÁ¦¡£
+#pragma once    //é˜²æ­¢å¤´æ–‡ä»¶è¢«å¤šæ¬¡åŒ…å«ã€‚
+#define HashMaxSize 1000    //å®å®šä¹‰å“ˆå¸Œè¡¨çš„æœ€å¤§å®¹é‡
+#define LoadFactor 0.8       //å®å®šä¹‰è´Ÿè½½å› å­ï¼Œç”¨äºè¡¨ç¤ºå“ˆå¸Œè¡¨çš„è´Ÿè½½èƒ½åŠ›ã€‚
 #include<stddef.h>
 typedef int KeyType;         
 typedef int ValueType;
-typedef size_t(*HashFunc)(KeyType key);     //ÖØ¶¨Òå¹şÏ£º¯Êı
+typedef size_t(*HashFunc)(KeyType key);     //é‡å®šä¹‰å“ˆå¸Œå‡½æ•°
 
-typedef enum Stat     //ÓÃÓÚ±íÊ¾Ã¿¸öÔªËØµÄ×´Ì¬
+typedef enum Stat     //ç”¨äºè¡¨ç¤ºæ¯ä¸ªå…ƒç´ çš„çŠ¶æ€
 {
-	Empty,     //¿Õ£¬µ±Ç°Ã»ÓĞÖµ
-	Valid,     //ÓĞĞ§£¬µ±Ç°µÄÖµÓĞĞ§
-	Invalid    //·Ç¿Õµ«ÎŞĞ§£¬±íÊ¾µ±Ç°½áµã±»É¾³ı
+	Empty,     //ç©ºï¼Œå½“å‰æ²¡æœ‰å€¼
+	Valid,     //æœ‰æ•ˆï¼Œå½“å‰çš„å€¼æœ‰æ•ˆ
+	Invalid    //éç©ºä½†æ— æ•ˆï¼Œè¡¨ç¤ºå½“å‰ç»“ç‚¹è¢«åˆ é™¤
 }Stat;
 
-typedef struct HashElem      //¹şÏ£±íµÄÔªËØ½á¹¹Ìå
+typedef struct HashElem      //å“ˆå¸Œè¡¨çš„å…ƒç´ ç»“æ„ä½“
 {
 	KeyType key;
 	ValueType value;
 	Stat stat;
 }HashElem;
 
-typedef struct HashTable              //¹şÏ£±í
+typedef struct HashTable              //å“ˆå¸Œè¡¨
 {
 	HashElem data[HashMaxSize];
-	size_t size;                 //µ±Ç°ÓĞĞ§µÄÔªËØ¸öÊı
+	size_t size;                 //å½“å‰æœ‰æ•ˆçš„å…ƒç´ ä¸ªæ•°
 	HashFunc hashfunc;
 }HashTable;
 
-///////////////////////////¹şÏ£±íµÄÏà¹Ø²Ù×÷///////////////////////////////////////
+///////////////////////////å“ˆå¸Œè¡¨çš„ç›¸å…³æ“ä½œ///////////////////////////////////////
 void HashTableInit(HashTable* ht,HashFunc hashfunc);
 
 int HashTableInsert(HashTable* ht, KeyType key, ValueType value);
 
-//¹şÏ£±íµÄ²éÕÒ£¬ÕÒµ½·µ»Ø1£¬²¢·µ»ØÕâ¸ö½áµãµÄvalueÖµ£¬Î´ÕÒµ½·µ»Ø0
+//å“ˆå¸Œè¡¨çš„æŸ¥æ‰¾ï¼Œæ‰¾åˆ°è¿”å›1ï¼Œå¹¶è¿”å›è¿™ä¸ªç»“ç‚¹çš„valueå€¼ï¼Œæœªæ‰¾åˆ°è¿”å›0
 int HashTableFind(HashTable* ht, KeyType key,ValueType* value,size_t* cur);
 
-//É¾³ıÖµÎªkeyµÄ½áµã
+//åˆ é™¤å€¼ä¸ºkeyçš„ç»“ç‚¹
 void HashRemove(HashTable* ht, KeyType key);
 
-///ÅĞ¶Ï¹şÏ£±íÊÇ·ñÎª¿Õ
+///åˆ¤æ–­å“ˆå¸Œè¡¨æ˜¯å¦ä¸ºç©º
 int HashEmpty(HashTable* ht);
 
-//Çó¹şÏ£±íµÄ´óĞ¡
+//æ±‚å“ˆå¸Œè¡¨çš„å¤§å°
 size_t HashSize(HashTable* ht);
 
-//Ïú»Ù¹şÏ£±í
+//é”€æ¯å“ˆå¸Œè¡¨
 void HashTableDestroy(HashTable* ht);
