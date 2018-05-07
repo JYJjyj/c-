@@ -1,4 +1,6 @@
 #include "SeqQueue.c"
+#include<unistd.h>
+#include "SeqStack.c"
 #include "BinTree.h"
 void TreeInit(TreeNode** root)
 {
@@ -11,8 +13,8 @@ void PreOrder(TreeNode* root)
     if(root == NULL)
         return;
     printf("%c ",root->data);
-    PostOrder(root->lchild);
-    PostOrder(root->rchild);
+    PreOrder(root->lchild);
+    PreOrder(root->rchild);
 }
 void InOrder(TreeNode* root)
 {
@@ -147,7 +149,7 @@ size_t TreeLeafSize(TreeNode* root)
  * */ 
 size_t TreeKLevelSize(TreeNode* root, int K)
 {
-    if(root == NULL)
+    if(root == NULL && K > 0)
         return 0;
     if(K == 1)
         return 1;
@@ -171,10 +173,10 @@ TreeNode* TreeFind(TreeNode* root, TreeNodeType to_find)
         return root;
     else
     {
-        TreeFind(root->rchild,to_find);
-        TreeFind(root->lchild,to_find);
+        TreeNode *l = TreeFind(root->rchild,to_find);
+        TreeNode *r = TreeFind(root->lchild,to_find);
+        return (l == NULL ? r : l);
     }
-    return NULL;
 }
 
 TreeNode* LChild(TreeNode *root , TreeNode* node)
@@ -206,15 +208,11 @@ TreeNode* _Parent(TreeNode *root,TreeNode *node)
 {
     if(root == NULL)
         return NULL;
-    if(root->lchild == node)
+    if(root->lchild == node || root->rchild == node)
         return root;
-    if(root->rchild == node)
-        return root;
-    else{
-        TreeNode* ret = _Parent(root->lchild,node);
-        ret = _Parent(root->rchild,node);
-        return ret;
-    }
+    TreeNode* l = _Parent(root->lchild,node);
+    TreeNode *r = _Parent(root->rchild,node);
+    return (l==NULL? r : l);
 }
 TreeNode* Parent(TreeNode* root, TreeNode* node)
 {
@@ -226,13 +224,47 @@ TreeNode* Parent(TreeNode* root, TreeNode* node)
     return _Parent(root,node);
 }
 
-void PreOrderByLoop(TreeNode* root); 
+void PreOrderByLoop(TreeNode* root)
+{
+    assert(root);
+    //使用栈完成
+    SeqStack s;
+    SeqStackInit(&s);
+    //先将根节点入栈
+    SeqStackPush(&s,root);
+    //开始循环(循环条件:栈为空)
+    TreeNode* value;
+    while(SeqStackTop(&s,&value) != 0)
+    {
+      //访问栈顶元素，
+      printf("%c ",value->data);
+      SeqStackPop(&s);
+      //将其出栈，再依次将其右子树、左子树入栈
+      if(value->rchild != NULL)
+        SeqStackPush(&s,value->rchild);
+      if(value->lchild != NULL)
+        SeqStackPush(&s,value->lchild);
+    }
+}
 
-void InOrderByLoop(TreeNode* root); 
+void InOrderByLoop(TreeNode* root);
 
 void PostOrderByLoop(TreeNode* root); 
 
-void TreeMirror(TreeNode* root); 
+void swap(TreeNode **a,TreeNode **b)
+{
+    TreeNode *tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+void TreeMirror(TreeNode* root)
+{
+    if(root == NULL)
+        return;
+    swap((&root->lchild),&(root->rchild));
+    TreeMirror(root->lchild);
+    TreeMirror(root->rchild);
+}
 
 int IsCompleteTree(TreeNode* root);
 ///////////////////////////测试代码///////////////////////////////
@@ -249,11 +281,11 @@ void testOrder()
     TESTHEAD;
     TreeNodeType array[]="abd##eg###c#f##";
     TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
-    PostOrder(root);
+    PreOrder(root);
     printf("\n");
     InOrder(root);
     printf("\n");
-    PreOrder(root);
+    PostOrder(root);
     printf("\n");
     LevelOrder(root);
     printf("\n");
@@ -282,7 +314,7 @@ void testLchild()
     TESTHEAD;
     TreeNodeType array[]="abd##eg###c#f##";
     TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
-    TreeNode* ret = LChild(root,root);
+    TreeNode* ret = LChild(root,root->lchild->rchild);
     if(ret != NULL)
         printf("lchild :%c\n",ret->data);
     else{
@@ -294,7 +326,7 @@ void testRchild()
     TESTHEAD;
     TreeNodeType array[]="abd##eg###c#f##";
     TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
-    TreeNode* ret = RChild(root,root->lchild);
+    TreeNode* ret = RChild(root,root->rchild);
     if(ret != NULL)
         printf("rchild :%c\n",ret->data);
     else{
@@ -306,8 +338,36 @@ void testParent()
     TESTHEAD;
     TreeNodeType array[]="abd##eg###c#f##";
     TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
-    TreeNode* ret = Parent(root,root->lchild->rchild);
-    printf("parent :%c\n",ret->data);
+    TreeNode* ret = Parent(root,root->lchild);
+    printf("parent : %c\n",ret->data);
+}
+void testFind()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    printf("f  ---  %c\n",TreeFind(root,'f')->data);
+}
+void testMirror()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    PreOrder(root);
+    printf("\n");
+    TreeMirror(root);
+    PreOrder(root);
+    printf("\n");
+}
+void testPreLoop()
+{
+    TESTHEAD;
+    TreeNodeType array[]="abd##eg###c#f##";
+    TreeNode *root = TreeCreate(array,sizeof(array)/sizeof(TreeNodeType),'#');
+    PreOrder(root);
+    printf("\n");
+    PreOrderByLoop(root);
+    printf("\n");
 }
 void test()
 {
@@ -317,7 +377,10 @@ void test()
   testClone();
   testLchild();
   testRchild();
+  testFind();
   testParent();
+  testMirror();
+  testPreLoop();
 }
 
 int main()
