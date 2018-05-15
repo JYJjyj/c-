@@ -1,3 +1,4 @@
+//用c++模板 适配器实现队列
 #include <iostream>
 #include "../ListWithTemplate/List.h"
 using namespace std;
