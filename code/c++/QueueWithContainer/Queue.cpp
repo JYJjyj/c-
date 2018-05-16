@@ -8,7 +8,7 @@ class Queue
 public:
     void Push(const T& x)
     {
-        _con.PushFront(x);
+        _con.PushBack(x);
     }
     void Pop()
     {
