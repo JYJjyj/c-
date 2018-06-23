@@ -1,3 +1,4 @@
+#用适配器完成栈
 #include <iostream>
 #include <stdio.h>
 #include "../Vector/Vector.h"
